@@ -188,8 +188,10 @@ class Board:
 
     def drawStatus(self, screen):
         text = "Success"
-        if self.opponent_can_score or self.collision or self.goalies_count > 1:
+        if self.opponent_can_score or self.collision or self.goalies_count > 1 or self.defenders_invalid:
             text = "Failed: "
+            if self.defenders_invalid:
+                text += " defenders are not on grid"
             if self.opponent_can_score:
                 text += " opponent can score"
             if self.collision:
@@ -201,6 +203,12 @@ class Board:
         text_rect = text_surface.get_rect()
         text_rect.midbottom = (self.size[0] / 2, self.size[1])
         screen.blit(text_surface, text_rect)
+
+    def checkDefendersInvalid(self):
+        # If defenders are on the grid, the number of steps should 'almost' be an int
+        pos_steps = self.solution.defenders / self.problem.pos_step
+        return np.max(np.abs(pos_steps-np.round(pos_steps))) > 10 ** -6
+
 
     def checkGoalArea(self):
         self.goalies_count = 0
@@ -229,6 +237,7 @@ class Board:
         self.opponent_can_score = False
         self.updateDist()
         self.collision = self.checkCollisions()
+        self.defenders_invalid = self.checkDefendersInvalid()
         self.checkGoalArea()
         self.drawGoalArea(screen)
         self.drawKickRays(screen)
