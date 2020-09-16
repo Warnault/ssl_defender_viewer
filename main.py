@@ -5,7 +5,7 @@ import json
 
 from board import *
 
-if (len(sys.argv) < 3) :
+if (len(sys.argv) < 3):
     sys.exit("Usage: " + sys.argv[0] + " <problem.json> <solution.json>")
 
 problem_path = sys.argv[1]

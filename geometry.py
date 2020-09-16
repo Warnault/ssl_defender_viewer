@@ -1,11 +1,12 @@
 import math
 import numpy as np
 
-"""
-Return None if there is no intersection between the line and the segment or
-if the lines are coincident, otherwise, return the intersection point
-"""
+
 def segmentLineIntersection(seg_start, seg_end, line_p1, line_p2):
+    """
+    Return None if there is no intersection between the line and the segment or
+    if the lines are coincident, otherwise, return the intersection point
+    """
     # Line-segment intersection from points
     # https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
     x1 = seg_start[0]
@@ -26,16 +27,17 @@ def segmentLineIntersection(seg_start, seg_end, line_p1, line_p2):
         return None
     return np.array([x1+t*(x2-x1), y1+t*(y2-y1)])
 
-"""
-Return None if there is no intersection between the segment and the
-circle. If there is an interesection, return the first intersection with the
-circle.
-"""
+
 def segmentCircleIntersection(seg_start, seg_end, circle_center, circle_radius):
+    """
+    Return None if there is no intersection between the segment and the
+    circle. If there is an interesection, return the first intersection with the
+    circle.
+    """
     # First intersect segment with the normal line passing through center of the circle
     seg_dir = seg_end - seg_start
     seg_dir = seg_dir / np.linalg.norm(seg_dir)
-    normal_line_dir = np.array([-seg_dir[1],seg_dir[0]])
+    normal_line_dir = np.array([-seg_dir[1], seg_dir[0]])
     normal_intersection = segmentLineIntersection(seg_start, seg_end,
                                                   circle_center, circle_center + normal_line_dir)
     # Intersection is outside of segment or too far from circle_center
@@ -45,6 +47,5 @@ def segmentCircleIntersection(seg_start, seg_end, circle_center, circle_radius):
     if dist > circle_radius:
         return None
     # Intersection is inside the circle, now going to the border in opposite direction of seg_dir
-    offset_length = math.sqrt(circle_radius ** 2 - dist ** 2) # Pythagore
+    offset_length = math.sqrt(circle_radius ** 2 - dist ** 2)  # Pythagore
     return normal_intersection - offset_length * seg_dir
-    

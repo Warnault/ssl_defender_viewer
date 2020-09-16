@@ -1,6 +1,7 @@
 import numpy
 import sys
 
+
 class Solution:
     def __init__(self, data):
         # Checking cont
@@ -19,4 +20,4 @@ class Solution:
         return self.defenders.shape[1]
 
     def getDefender(self, def_id):
-        return self.defenders[:,def_id]
+        return self.defenders[:, def_id]
