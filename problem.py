@@ -45,6 +45,17 @@ class Problem:
         self.goalkeeper_area = None
         if "goalkeeper_area" in data:
             self.goalkeeper_area = numpy.array(data["goalkeeper_area"])
+            if self.goalkeeper_area.shape != (2,2):
+                raise ValueError("Invalid shape for 'goalkeeper_area': "
+                                 + str(self.goalkeeper_area.shape)
+                                 + " expecting (2, 2)")
+            for dim in range(self.goalkeeper_area.shape[0]):
+                dim_min = self.goalkeeper_area[dim,0]
+                dim_max = self.goalkeeper_area[dim,1]
+                if dim_min >= dim_max:
+                    raise ValueError("Invalid data for goalkeeper_area along"
+                                     "dim {:}, min >= max ({:} >= {:}".format(
+                                         dim, dim_min, dim_max))
 
     def getFieldCenter(self):
         """ Return the position of the center of the field """
