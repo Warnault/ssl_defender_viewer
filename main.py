@@ -21,16 +21,17 @@ if (version_path == "1") :
 	b = Board(problem, solution)
 	b.run()
 
-
 elif (version_path == "2"):
 	with open(problem_path) as problem_file:
 		problem = Problem(json.load(problem_file))
 	with open(solution_path) as solution_file:
 		solver = Solver(problem)
 		solver.solver(problem_path)
-		solution = Solution(json.load(solution_file))
+		print('pass')
+		#solution = Solution(json.load(solution_file))
 	#b = Board(problem, solution)
 	#b.run()
+	print('exec succes')
 else :
 	 sys.exit("Usage: " + sys.argv[0] + " <version> <problem.json> <solution.json> \n version 1 : prof \n version 2 : la notre")
 

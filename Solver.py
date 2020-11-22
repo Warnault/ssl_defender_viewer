@@ -9,7 +9,6 @@ from problem import *
 from solution import *
 from board import *
 
-step =0.25
 # write  defenders position in self.solution and call self.read_in_file() for create .json
 class Solver :
 	def __init__(self,problem) :
@@ -43,12 +42,40 @@ class Solver :
 		len_filed = data["field_limits"]
 		width = len_filed[0]
 		heigth = len_filed[1]
-		list_defs = []
+		step = data["pos_step"]
+		last_x = width[0]
+		last_y = heigth[0]
 		print("W= "+str(width) + ", H= "+ str(heigth))
-		for x in numpy.arange(width[0],width[1],step) :
-			for y in  numpy.arange(heigth[0],heigth[1],step) :
-				coord = [x,y]
-				self.solution.append(coord)
+		for x in numpy.arange(width[0],width[1],step):
+			if( (x==width[0]) or (last_x+data["robot_radius"] < x-data["robot_radius"]) ):
+				for y in  numpy.arange(heigth[0],heigth[1],step):
+					last_x = x
+					if( (y==heigth[0]) or (last_y+data["robot_radius"] < y-data["robot_radius"]) ):
+						last_y = y
+						coord = [x,y]
+						if(not collision_with_ennemy(file_pb,coord)): 
+							self.solution.append(coord)
 		
 		#coordinates = [(x, y) for x in xrange(width) for y in xrange(height)]
 
+
+def lies_in_range(interval,coord,radius):
+	values = [(coord-radius),coord,(coord+radius)]
+	for val in values:
+		if( val>=interval[0] and val<=interval[1] ): 
+			print("pass")
+			return True
+	#print("nontefghdf")
+	return False
+	
+def collision_with_ennemy(file_pb,coord):
+	file = open(file_pb,)
+	data = json.load(file)
+	opponent = data["opponents"]
+	radius = data["robot_radius"]
+	for e in opponent:
+		interval_x = [(e[0]-radius),(e[0]+radius)]
+		interval_y = [(e[1]-radius),(e[1]+radius)]
+		if( lies_in_range(interval_x,coord[0],radius) and lies_in_range(interval_y,coord[1],radius)):
+			return True
+	return False

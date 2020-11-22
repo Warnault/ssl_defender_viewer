@@ -5,6 +5,7 @@ import sys
 class Solution:
     def __init__(self, data):
         # Checking cont
+        print("bonjoru")
         mandatory_keys = ["defenders"]
         for key in mandatory_keys:
             if key not in data:
