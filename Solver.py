@@ -43,29 +43,45 @@ class Solver :
 		width = len_filed[0]
 		heigth = len_filed[1]
 		step = data["pos_step"]
-		last_x = width[0]
-		last_y = heigth[0]
-		print("W= "+str(width) + ", H= "+ str(heigth))
-		for x in numpy.arange(width[0],width[1],step):
-			if( (x==width[0]) or (last_x+data["robot_radius"] < x-data["robot_radius"]) ):
-				for y in  numpy.arange(heigth[0],heigth[1],step):
+		initialized_x = self.init_pos_x(data["opponents"])+step
+		[born_min_y,born_max_y] = self.init_pos_y( data["opponents"], heigth, data["goals"][0]["posts"] )
+		last_x = initialized_x
+		last_y = born_min_y
+		for x in numpy.arange(initialized_x,width[1],step):
+			if( (x==initialized_x) or (last_x+data["robot_radius"] < x-data["robot_radius"]) ):
+				for y in  numpy.arange(born_min_y,born_max_y,step):
 					last_x = x
-					if( (y==heigth[0]) or (last_y+data["robot_radius"] < y-data["robot_radius"]) ):
+					if( (y==born_min_y) or (last_y+data["robot_radius"] < y-data["robot_radius"]) ):
 						last_y = y
 						coord = [x,y]
-						if(not collision_with_ennemy(file_pb,coord)): 
+						if(not collision_with_ennemy(file_pb,coord)):
 							self.solution.append(coord)
-		
 		#coordinates = [(x, y) for x in xrange(width) for y in xrange(height)]
 
+	def init_pos_x(self,opponent) :
+		x = opponent[0][0]
+		for e in opponent:
+			if( x>e[0] ): 
+				x=e[0]
+		return x
+
+	def init_pos_y(self, opponent, coords_y, goal_pos):
+		print("opponent : "+str(opponent))
+		print("coords_y : "+str(coords_y))
+		print("goal_pos : "+str(goal_pos))
+		[min_y, max_y] = coords_y
+		[min_y_b, max_y_b] = [goal_pos[0][1],goal_pos[1][1]]
+		print("[min_y_b, max_y_b] = "+ str( [min_y_b, max_y_b]))
+		for e in opponent:
+			if( e[1]>min_y and e[1]<min_y_b ):  min_y = e[1]
+			elif( e[1]<max_y and e[1]>max_y_b ): max_y = e[1]
+		return [min_y, max_y]
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
 	for val in values:
 		if( val>=interval[0] and val<=interval[1] ): 
-			print("pass")
 			return True
-	#print("nontefghdf")
 	return False
 	
 def collision_with_ennemy(file_pb,coord):
@@ -79,3 +95,5 @@ def collision_with_ennemy(file_pb,coord):
 		if( lies_in_range(interval_x,coord[0],radius) and lies_in_range(interval_y,coord[1],radius)):
 			return True
 	return False
+
+
