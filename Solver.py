@@ -20,7 +20,7 @@ class Solver :
 
 	def solver(self,file_pb):
 		self.generate_all_posible_def(file_pb)
-		self.solution = createGraph(self.problem, self.solution)
+		graph = self.createGraph()
 		self.write_in_file()
 		#self.read_file()
 
@@ -79,14 +79,22 @@ class Solver :
 		problem = self.problem
 		defenders = self.solution
 		new_defenders =[]
+		graph = {}
 		kicks = shootOnTarget(problem)
-		for kick in kicks:
-			for defender in defenders:
+		for defender in defenders:
+			allkicksIntercepted = []
+			for kick in kicks:
 				collide_point = segmentCircleIntersection(
 					kick[0], kick[1], defender, problem.robot_radius)
 				if not collide_point is None :
 					new_defenders.append(defender)
-		return new_defenders
+					allkicksIntercepted += kick
+					#clé: defenseur --> "x,y"
+					key = str(defender[0])+","+str(defender[1])
+					#valeur: tableau des (opposant,tirs) arrêté
+					graph[key] = allkicksIntercepted
+		self.solution = new_defenders
+		return graph
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
@@ -121,4 +129,5 @@ def shootOnTarget(problem):
 					sommet.append(kick_result)
 					kicks.append(sommet)
 			kick_dir += problem.theta_step
+	#print(kicks)
 	return kicks
