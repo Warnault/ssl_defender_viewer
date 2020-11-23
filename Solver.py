@@ -3,6 +3,7 @@
 import numpy
 import sys
 import json
+import math
 
 from goal import *
 from problem import *
@@ -19,6 +20,7 @@ class Solver :
 
 	def solver(self,file_pb):
 		self.generate_all_posible_def(file_pb)
+		self.solution = createGraph(self.problem, self.solution)
 		self.write_in_file()
 		#self.read_file()
 
@@ -66,16 +68,25 @@ class Solver :
 		return x
 
 	def init_pos_y(self, opponent, coords_y, goal_pos):
-		print("opponent : "+str(opponent))
-		print("coords_y : "+str(coords_y))
-		print("goal_pos : "+str(goal_pos))
 		[min_y, max_y] = coords_y
 		[min_y_b, max_y_b] = [goal_pos[0][1],goal_pos[1][1]]
-		print("[min_y_b, max_y_b] = "+ str( [min_y_b, max_y_b]))
 		for e in opponent:
 			if( e[1]>min_y and e[1]<min_y_b ):  min_y = e[1]
 			elif( e[1]<max_y and e[1]>max_y_b ): max_y = e[1]
 		return [min_y, max_y]
+
+	def createGraph(self):
+		problem = self.problem
+		defenders = self.solution
+		new_defenders =[]
+		kicks = shootOnTarget(problem)
+		for kick in kicks:
+			for defender in defenders:
+				collide_point = segmentCircleIntersection(
+					kick[0], kick[1], defender, problem.robot_radius)
+				if not collide_point is None :
+					new_defenders.append(defender)
+		return new_defenders
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
@@ -96,4 +107,18 @@ def collision_with_ennemy(file_pb,coord):
 			return True
 	return False
 
-
+def shootOnTarget(problem):
+	kicks = []
+	for opp_id in range(problem.getNbOpponents()):
+		opponent = problem.getOpponent(opp_id)
+		kick_dir = 0
+		while kick_dir < 2*math.pi :
+			for goal in problem.goals :
+				kick_result = goal.kickResult(opponent, kick_dir)
+				if not kick_result is None:
+					sommet = []
+					sommet.append(opponent)
+					sommet.append(kick_result)
+					kicks.append(sommet)
+			kick_dir += problem.theta_step
+	return kicks
