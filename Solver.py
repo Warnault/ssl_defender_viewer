@@ -36,7 +36,6 @@ class Solver :
 		dictNeighbors = self.defendersNeighbors()
 		dictKick = self.kicksNeighbors()
 		dictNeighbors.update(dictKick)
-		print(dictNeighbors)
 
 		self.write_in_file()
 		#self.read_file()
@@ -98,12 +97,16 @@ class Solver :
 		defenders = self.solution
 		new_defenders =[]
 		for defender in defenders:
+			intercepted = False
 			for kick in self.kicks:
 				collide_point = segmentCircleIntersection(
 					kick[0], kick[1], defender, problem.robot_radius)
-				if not collide_point is None :
-					new_defenders.append(defender)
+				if not collide_point is None:
+					intercepted = True
+			if(intercepted): 
+				new_defenders.append(defender)
 		self.solution = new_defenders
+		
 
 	def shootOnTarget(self):
 		problem = self.problem
@@ -156,10 +159,8 @@ class Solver :
 			if(intercepted) :
 				nameKicked = findKey(self.tabKicks, kick)
 				dict[nameKicked] = tabDefs
-		return dict
-					
+		return dict		
 		
-
 	def createNameArray(self):
 		self.tabKicks = giveName(self.kicks, "T")
 
@@ -178,6 +179,14 @@ def collision_with_ennemy(file_pb,coord):
 	opponent = data["opponents"]
 	radius = data["robot_radius"]
 	for e in opponent:
+		interval_x = [(e[0]-radius),(e[0]+radius)]
+		interval_y = [(e[1]-radius),(e[1]+radius)]
+		if( lies_in_range(interval_x,coord[0],radius) and lies_in_range(interval_y,coord[1],radius)):
+			return True
+	return False
+
+def collision(tab, coord, radius):
+	for e in tab:
 		interval_x = [(e[0]-radius),(e[0]+radius)]
 		interval_y = [(e[1]-radius),(e[1]+radius)]
 		if( lies_in_range(interval_x,coord[0],radius) and lies_in_range(interval_y,coord[1],radius)):
