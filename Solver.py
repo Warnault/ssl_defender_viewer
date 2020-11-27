@@ -15,14 +15,32 @@ class Solver :
 	def __init__(self,problem) :
 		self.problem = problem
 		self.solution = []
+		self.kicks = []
 		self.name_file = 'sol.json'
+		self.tabKicks = {}
+		self.tabDefs = {}
 		
 
 	def solver(self,file_pb):
+		#Genere tous les défenseurs possible
 		self.generate_all_posible_def(file_pb)
-		graph = self.createGraph()
+		#Genere tous les tirs marquant
+		self.shootOnTarget()
+		#Garde les défenseurs qui bloques les tirs
+		self.defendersStopKicks()
+
+		#Crée le dictionnaire avec nom: position
+		self.createNameArray()
+
+		#Crée list d'adjacence
+		dictNeighbors = self.defendersNeighbors()
+		dictKick = self.kicksNeighbors()
+		dictNeighbors.update(dictKick)
+		print(dictNeighbors)
+
 		self.write_in_file()
 		#self.read_file()
+
 
 
 	def write_in_file(self,) :
@@ -75,26 +93,77 @@ class Solver :
 			elif( e[1]<max_y and e[1]>max_y_b ): max_y = e[1]
 		return [min_y, max_y]
 
-	def createGraph(self):
+	def defendersStopKicks(self):
 		problem = self.problem
 		defenders = self.solution
 		new_defenders =[]
-		graph = {}
-		kicks = shootOnTarget(problem)
 		for defender in defenders:
-			allkicksIntercepted = []
-			for kick in kicks:
+			for kick in self.kicks:
 				collide_point = segmentCircleIntersection(
 					kick[0], kick[1], defender, problem.robot_radius)
 				if not collide_point is None :
 					new_defenders.append(defender)
-					allkicksIntercepted += kick
-					#clé: defenseur --> "x,y"
-					key = str(defender[0])+","+str(defender[1])
-					#valeur: tableau des (opposant,tirs) arrêté
-					graph[key] = allkicksIntercepted
 		self.solution = new_defenders
-		return graph
+
+	def shootOnTarget(self):
+		problem = self.problem
+		for opp_id in range(problem.getNbOpponents()):
+			opponent = problem.getOpponent(opp_id)
+			kick_dir = 0
+			while kick_dir < 2*math.pi :
+				for goal in problem.goals :
+					kick_result = goal.kickResult(opponent, kick_dir)
+					if not kick_result is None:
+						sommet = []
+						sommet.append(opponent)
+						sommet.append(kick_result)
+						self.kicks.append(sommet)
+				kick_dir += problem.theta_step
+
+	def defendersNeighbors(self):
+		problem = self.problem
+		defenders = self.solution
+		dict = {}
+		for defender in defenders:
+			tabKick = []
+			intercepted = False
+			for kick in self.kicks:
+				collide_point = segmentCircleIntersection(
+					kick[0], kick[1], defender, problem.robot_radius)
+				if not collide_point is None :
+					nameKicked = findKey(self.tabKicks, kick)
+					tabKick.append(nameKicked)
+					intercepted = True
+			if(intercepted) :
+				nameDefender = findKey(self.tabDefs, defender)
+				dict[nameDefender] = tabKick
+		return dict
+
+	def kicksNeighbors(self):
+		problem = self.problem
+		defenders = self.solution
+		dict = {}
+		for kick in self.kicks:
+			tabDefs = []
+			intercepted = False
+			for defender in defenders:
+				collide_point = segmentCircleIntersection(
+					kick[0], kick[1], defender, problem.robot_radius)
+				if not collide_point is None :
+					nameDefs = findKey(self.tabDefs, defender)
+					tabDefs.append(nameDefs)
+					intercepted = True
+			if(intercepted) :
+				nameKicked = findKey(self.tabKicks, kick)
+				dict[nameKicked] = tabDefs
+		return dict
+					
+		
+
+	def createNameArray(self):
+		self.tabKicks = giveName(self.kicks, "T")
+
+		self.tabDefs = giveName(self.solution, "D")
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
@@ -115,19 +184,18 @@ def collision_with_ennemy(file_pb,coord):
 			return True
 	return False
 
-def shootOnTarget(problem):
-	kicks = []
-	for opp_id in range(problem.getNbOpponents()):
-		opponent = problem.getOpponent(opp_id)
-		kick_dir = 0
-		while kick_dir < 2*math.pi :
-			for goal in problem.goals :
-				kick_result = goal.kickResult(opponent, kick_dir)
-				if not kick_result is None:
-					sommet = []
-					sommet.append(opponent)
-					sommet.append(kick_result)
-					kicks.append(sommet)
-			kick_dir += problem.theta_step
-	#print(kicks)
-	return kicks
+def giveName(tab, letter): 
+	num = 0
+	dict = {}
+	for element in tab:
+		name = letter + str(num)
+		dict[name] = element
+		num += 1
+	return dict
+
+def findKey(dict, value):
+	for key in dict :
+		val = dict.get(key)
+		if str(val) == str(value):
+			return key
+	return None
