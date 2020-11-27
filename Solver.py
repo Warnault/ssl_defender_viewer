@@ -17,6 +17,7 @@ class Solver :
 		self.solution = []
 		self.kicks = []
 		self.name_file = 'sol.json'
+		self.dictNeighbors={}
 		self.tabKicks = {}
 		self.tabDefs = {}
 		
@@ -33,9 +34,9 @@ class Solver :
 		self.createNameArray()
 
 		#Crée list d'adjacence
-		dictNeighbors = self.defendersNeighbors()
+		self.dictNeighbors = self.defendersNeighbors()
 		dictKick = self.kicksNeighbors()
-		dictNeighbors.update(dictKick)
+		self.dictNeighbors.update(dictKick)
 
 		self.write_in_file()
 		#self.read_file()
