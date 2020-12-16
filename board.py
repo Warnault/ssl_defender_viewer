@@ -59,6 +59,14 @@ class Board:
             self.max_dist = maxDist(
                 self.problem.defenders, self.solution.defenders)
             print("Max dist: {:f}".format(self.max_dist))
+        # Compute results of shots
+        self.updateShotsResults()
+        # Handling dynamic case
+        self.time = None
+        if self.problem.ball_max_speed is not None:
+            self.time = 0
+            # TODO compute max_time when loading problem
+            self.max_time = 1.0 # [s]
 
     def getDefenders(self):
         """
@@ -87,57 +95,49 @@ class Board:
         pixel = self.getImgCenter() + offset_pixel
         return [int(pixel[0]), int(pixel[1])]
 
+    def updateShotsResults(self):
+        """
+        Analyze the results of shots according to current defenders positions
+        """
+        self.shots = self.problem.computeShotsResults(self.getDefenders())
+
     def drawSegmentInField(self, screen, color, pos1, pos2, thickness):
         start = self.getPixelFromField(pos1)
         end = self.getPixelFromField(pos2)
         pygame.draw.line(screen, color, start, end, thickness)
 
-    def drawKickRay(self, screen, robot_pos, kick_dir):
+    def drawShot(self, screen, shot):
         """
         Also updates self.opponent_can_score if kick reaches a goal and is not intercepted
         """
-        # Getting closest goal to score
-        kick_end = None
-        best_dist = None
-        for goal in self.problem.goals:
-            kick_result = goal.kickResult(robot_pos, kick_dir)
-            if not kick_result is None:
-                goal_dist = numpy.linalg.norm(robot_pos - kick_result)
-                if best_dist == None or goal_dist < best_dist:
-                    best_dist = goal_dist
-                    kick_end = kick_result
-        if not kick_end is None:
-            # Checking if kick is intercepted by one of the opponent and which one is the first
-            intercepted = False
-            defenders = self.getDefenders()
-            for def_id in range(defenders.shape[1]):
-                defender = defenders[:, def_id]
-                collide_point = segmentCircleIntersection(robot_pos, kick_end,
-                                                          defender, self.problem.robot_radius)
-                if not collide_point is None:
-                    kick_end = collide_point
-                    intercepted = True
-            # TODO
-            color = self.failure_color
-            if intercepted:
-                color = self.success_color
-            else:
-                self.opponent_can_score = True
-            self.drawSegmentInField(screen, color, robot_pos, kick_end, 1)
+        color = self.failure_color
+        if shot.result != ShotResult.GOAL:
+            color = self.success_color
+        else:
+            self.opponent_can_score = True
+        self.drawSegmentInField(screen, color, shot.src, shot.end, 1)
 
-    def drawKickRays(self, screen):
-        for opp_id in range(self.problem.getNbOpponents()):
-            kick_dir = 0
-            while kick_dir < 2 * math.pi:
-                self.drawKickRay(
-                    screen, self.problem.getOpponent(opp_id), kick_dir)
-                kick_dir += self.problem.theta_step
+    def drawShots(self, screen):
+        for shot in self.shots:
+            self.drawShot(screen, shot)
 
     def drawGoals(self, screen):
         for goal in self.problem.goals:
             self.drawSegmentInField(screen, self.goal_color,
                                     goal.posts[:, 0], goal.posts[:, 1],
                                     self.goal_thickness)
+
+    def drawDefendersZones(self, screen):
+        if self.time is None:
+            return
+        D = self.getDefenders()
+        t = min(self.time, self.max_time)
+        intercept_dist = self.problem.robot_radius + t * self.problem.robot_max_speed
+        for robot_id in range(D.shape[1]):
+            pygame.draw.circle(screen, np.array(self.defender_color) * 0.2,
+                               self.getPixelFromField(D[:, robot_id]),
+                               int(intercept_dist * self.getRatio()))
+
 
     def drawRobots(self, screen, robots, color):
         for robot_id in range(robots.shape[1]):
@@ -157,12 +157,22 @@ class Board:
     def drawDefenders(self, screen):
         self.drawRobots(screen, self.getDefenders(), self.defender_color)
 
-    def updateDist(self):
+    def step(self):
+        """
+        Updates variables when dynamic display is required
+        """
         if (not self.max_dist is None):
             self.dist += 0.01
             # Adding a sleep dist to freeze once situation is reached
             if (self.dist > self.max_dist + 0.5):
                 self.dist = 0
+            self.updateShotsResults()
+        if self.time is not None:
+            dt = 0.002 # [s]
+            pause_duration = 0.5 # [s]
+            self.time += dt
+            if self.time > self.max_time + pause_duration:
+                self.time = 0
 
     def checkCollisions(self):
         robots = numpy.concatenate(
@@ -209,7 +219,6 @@ class Board:
         pos_steps = self.solution.defenders / self.problem.pos_step
         return np.max(np.abs(pos_steps-np.round(pos_steps))) > 10 ** -6
 
-
     def checkGoalArea(self):
         self.goalies_count = 0
         if not self.problem.goalkeeper_area is None:
@@ -235,12 +244,13 @@ class Board:
 
     def draw(self, screen):
         self.opponent_can_score = False
-        self.updateDist()
+        self.step()
         self.collision = self.checkCollisions()
         self.defenders_invalid = self.checkDefendersInvalid()
         self.checkGoalArea()
         self.drawGoalArea(screen)
-        self.drawKickRays(screen)
+        self.drawDefendersZones(screen)
+        self.drawShots(screen)
         self.drawGoals(screen)
         self.drawOpponents(screen)
         self.drawDefenders(screen)
