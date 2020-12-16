@@ -19,6 +19,12 @@ def maxDist(src, dst):
     return max_dist
 
 
+def interpolateSimplePos(src, dst, dist):
+    D = np.linalg.norm(dst-src)
+    if dist >= D:
+        return dst
+    return src + (dst-src) * dist / D
+
 def interpolatePos(src, dst, dist):
     """
     Return the position of a robot traveling from 'src' to 'dst' with a budget of 'dist'
@@ -64,9 +70,13 @@ class Board:
         # Handling dynamic case
         self.time = None
         if self.problem.ball_max_speed is not None:
+            max_shot_dist = 0
+            for shot in self.shots:
+                shot_dist = np.linalg.norm(shot.end - shot.src)
+                if shot_dist > max_shot_dist:
+                    max_shot_dist = shot_dist
             self.time = 0
-            # TODO compute max_time when loading problem
-            self.max_time = 1.0 # [s]
+            self.max_time = max_shot_dist / self.problem.ball_max_speed
 
     def getDefenders(self):
         """
@@ -115,7 +125,11 @@ class Board:
             color = self.success_color
         else:
             self.opponent_can_score = True
-        self.drawSegmentInField(screen, color, shot.src, shot.end, 1)
+        end = shot.end
+        if self.time is not None:
+            ball_dist = self.problem.ball_max_speed * min(self.time, self.max_time)
+            end = interpolateSimplePos(shot.src, shot.end, ball_dist)
+        self.drawSegmentInField(screen, color, shot.src, end, 1)
 
     def drawShots(self, screen):
         for shot in self.shots:
@@ -161,17 +175,18 @@ class Board:
         """
         Updates variables when dynamic display is required
         """
+        frame_freeze = 50
         if (not self.max_dist is None):
-            self.dist += 0.01
+            dist_step = 0.01
+            self.dist += dist_step
             # Adding a sleep dist to freeze once situation is reached
-            if (self.dist > self.max_dist + 0.5):
+            if (self.dist > self.max_dist + frame_freeze * dist_step):
                 self.dist = 0
             self.updateShotsResults()
         if self.time is not None:
             dt = 0.002 # [s]
-            pause_duration = 0.5 # [s]
             self.time += dt
-            if self.time > self.max_time + pause_duration:
+            if self.time > self.max_time + frame_freeze * dt:
                 self.time = 0
 
     def checkCollisions(self):
