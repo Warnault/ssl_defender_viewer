@@ -134,12 +134,9 @@ class Problem:
         for def_id in range(defenders.shape[1]):
             defender = defenders[:, def_id]
             if self.ball_max_speed is not None:
-                collide_point = segmentPointProjection(src, kick_end, defender)
-                robot_dist = np.linalg.norm(collide_point - defender) - self.robot_radius
-                robot_time = robot_dist / self.robot_max_speed
-                ball_time = np.linalg.norm(collide_point - src) / self.ball_max_speed
-                if ball_time < robot_time:
-                    collide_point = None
+                collide_point = getDynamicInterception(src, kick_end, defender,
+                                                       self.ball_max_speed,
+                                                       self.robot_max_speed)
             else:
                 collide_point = segmentCircleIntersection(
                     src, kick_end, defender, self.robot_radius)
@@ -159,3 +156,62 @@ class Problem:
                     shots.append(s)
                 kick_dir += self.theta_step
         return shots
+
+def getDynamicInterception(S, E, R, v_ball, v_robot):
+    """
+    Return the position *I* where robot *R* is available to intercept the ball
+    kicked from position *S* to *E* given allowed speed *v_ball* and *v_robot*
+
+                A
+    S--------I-----P-----E
+              \    |
+               \   |
+             C  \  | B
+                 \ |
+                  \|
+                   R
+
+    with the constraints |R-I| / v_robot = |S-I| / v_ball
+    """
+    P = linePointProjection(S,E,R)
+    B = np.linalg.norm(P-R)
+    D = np.linalg.norm(P-S)
+    # We have two equations:
+    # 1. A^2 + B^2 = C^2
+    # 2. (D-A) / v_ball = C / v_robot   <- Same time to reach position
+    # This leads to (with 'detailed steps')
+    # A^2 + B^2 = (v_robot*(D-A)/v_ball)^2
+    # We further note (v_robot/v_ball)^2 by VRB2
+    # 2. A^2 + B^2 = VRB2 * (D^2 -2DA + A^2)
+    # 3. (1- VRB2) A^2 + 2*D*A*VRB2 + (B^2 - D^2 VRB2)
+    VRB2 = (v_robot/v_ball)**2
+    a = 1 - VRB2
+    b = 2 * D * VRB2
+    c = B**2-D**2*VRB2
+    potential_A = []
+    if a == 0:
+        if c == 0:
+            potential_A = [0]
+        else:
+            # Simple case
+            potential_A = [-c/b]
+    else:
+        # order 2 equation
+        discriminant = b**2 - 4*a*c
+        if discriminant < 0:
+            return None
+        potential_A.append((-b + np.sqrt(discriminant)) / (2*a))
+        potential_A.append((-b - np.sqrt(discriminant)) / (2*a))
+    kick_dist = np.linalg.norm(S-E)
+    best_A =  kick_dist + 10**-6
+    for A in potential_A:
+        # Interception can't occur before S or after E
+        if A > D or (D-A) > kick_dist:
+            continue
+        # Since we want first valid interception in time, we want to minimize A
+        if abs(A) < abs(best_A):
+            best_A = A
+    if abs(best_A) > kick_dist:
+        return None
+    return S + (E-S)/kick_dist * (D-best_A)
+

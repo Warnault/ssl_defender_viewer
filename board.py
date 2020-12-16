@@ -146,12 +146,11 @@ class Board:
             return
         D = self.getDefenders()
         t = min(self.time, self.max_time)
-        intercept_dist = self.problem.robot_radius + t * self.problem.robot_max_speed
+        intercept_dist = t * self.problem.robot_max_speed
         for robot_id in range(D.shape[1]):
             pygame.draw.circle(screen, np.array(self.defender_color) * 0.2,
                                self.getPixelFromField(D[:, robot_id]),
                                int(intercept_dist * self.getRatio()))
-
 
     def drawRobots(self, screen, robots, color):
         for robot_id in range(robots.shape[1]):
