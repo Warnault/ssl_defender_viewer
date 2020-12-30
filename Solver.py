@@ -15,11 +15,21 @@ class Solver :
 	def __init__(self,problem) :
 		self.problem = problem
 		self.solution = []
-		self.kicks = []
 		self.name_file = 'sol.json'
+
+		#Contient tous les kickcs marquant
+		self.kicks = []
+		#Tableau d'adjacence {tir -> def & def -> tir}
 		self.dictNeighbors={}
+
+		#Associe une valeur a un nom:
+		#T0 -> [x, y] 
 		self.tabKicks = {}
+		#D0 -> [x, y] 
 		self.tabDefs = {}
+
+		#Solution:
+		self.algoExact([], 0)
 		
 
 	def solver(self,file_pb):
@@ -166,6 +176,49 @@ class Solver :
 		self.tabKicks = giveName(self.kicks, "T")
 
 		self.tabDefs = giveName(self.solution, "D")
+
+	def algoExact(self, tabDef, currentDef):
+		numDef = len(self.tabDefs)
+		#Bloque si on a parcourut tous les défenseurs
+		if(currentDef == numDef):
+			return False
+		for i in range(currentDef, numDef) :
+			newTabDef = tabDef
+			newTabDef.append(self.tabDefs.get(i))
+			#Verifie si tous les tirs sont bloqué
+			if(self.allKicksStop(newTabDef)):
+				self.solution = self.chercheDefenders(newTabDef)
+				return True
+			#Relance l'algo avec un élément dans le tableau de plus
+			return self.algoExact(newTabDef, i+1)
+
+	def algoGlouton(self, tabKick, tabDef):
+		tabKickLength = len(tabKick)
+		tabDefLength = len(tabDef)
+		maxNeighbourLength = 0
+		if(tabKickLength):
+			self.solution = self.chercheDefenders(newTabDef)
+			return True
+		if(tabDefLength):
+			return False
+		for defender in tabDef:
+			num = self.numKickOfDefender(tabKick, tabDef.get(defender)):
+			if(num > maxNeighbourLength)
+				maxNeighbourLength = num
+		
+	
+	#Récupérer les valeurs des defenders en fonctions de leurs nom
+	def chercheDefenders(self, tabDef):
+		return []
+
+	#Verifie que le nombre de kicks bloquer est egale au total du nombre de kicks
+	def allKicksStop(self, tabDef):
+		return True
+	
+	#Cherche le nombre de voisin en fonction de ceux de la list
+	def numKickOfDefender(self, tabKick, tabDef):
+		return 0
+
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
