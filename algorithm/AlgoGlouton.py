@@ -4,8 +4,11 @@ import numpy
 import sys
 import json
 import math
+import abc 
 
-class AlgoGlouton :
+from algorithm.AlgoSolver import *
+
+class AlgoGlouton(AlgoSolver) :
   def __init__(self,dictNeighbors,list_of_defencers) :
     self.list_name_of_defencers = list_of_defencers
     self.dictNeighbors = dictNeighbors
@@ -40,12 +43,6 @@ class AlgoGlouton :
     tabDef.remove(maxDefender)
     return self.algoGlouton(tabKick, tabDef, tabDefSol)
 
-	#Récupérer les valeurs des defenders en fonctions de leurs nom
-  def chercheDefenders(self, tabDef):
-    res = []
-    for defender in tabDef:
-      res.append(self.list_name_of_defencers.get(defender))
-    return res
 
   #Cherche le nombre de voisin en fonction de ceux de la list
   def numKickOfDefender(self, tabKick, kickStopByDefender):
@@ -63,9 +60,3 @@ class AlgoGlouton :
       tabKick.remove(kick)
     return tabKick
 
-  def createListKickAndDef(self):
-    for key in self.dictNeighbors :
-      if "D" in key : 
-        self.list_defender.append(key)
-      else :
-        self.list_kick.append(key)
