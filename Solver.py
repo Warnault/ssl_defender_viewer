@@ -12,7 +12,7 @@ from board import *
 
 # write  defenders position in self.solution and call self.read_in_file() for create .json
 class Solver :
-	def __init__(self,problem) :
+	def __init__(self,problem,algo_solver) :
 		self.problem = problem
 		self.solution = []
 		self.name_file = 'sol.json'
@@ -28,8 +28,9 @@ class Solver :
 		#D0 -> [x, y] 
 		self.tabDefs = {}
 
+		self.algo_solver = algo_solver
 		#Solution:
-		self.algoExact([], 0)
+		##self.algoExact([], 0)
 		
 
 	def solver(self,file_pb):
@@ -49,7 +50,8 @@ class Solver :
 		self.dictNeighbors.update(dictKick)
 
 		self.write_in_file()
-		#self.read_file()
+	
+		self.algo_solver(self.solver,"846")
 
 
 
@@ -176,73 +178,6 @@ class Solver :
 		self.tabKicks = giveName(self.kicks, "T")
 
 		self.tabDefs = giveName(self.solution, "D")
-
-	def algoExact(self, tabDef, currentDef):
-		numDef = len(self.tabDefs)
-		#Bloque si on a parcourut tous les défenseurs
-		if(currentDef == numDef):
-			return False
-		for i in range(currentDef, numDef) :
-			newTabDef = tabDef
-			newTabDef.append(self.tabDefs.get(i))
-			#Verifie si tous les tirs sont bloqué
-			if(self.allKicksStop(newTabDef)):
-				self.solution = self.chercheDefenders(newTabDef)
-				return True
-			#Relance l'algo avec un élément dans le tableau de plus
-			return self.algoExact(newTabDef, i+1)
-
-
-	def algoGlouton(self, tabKick, tabDef, tabDefSol):
-		tabKickLength = len(tabKick)
-		tabDefLength = len(tabDef)
-		maxDefender = None
-		maxNeighbourLength = 0
-		if(tabKickLength == 0):
-			self.solution = self.chercheDefenders(tabDefSol)
-			return True
-		if(tabDefLength == 0):
-			return False
-		for defender in tabDef:
-			num = self.numKickOfDefender(tabKick, tabDef.get(defender))
-			if(num > maxNeighbourLength):
-				maxNeighbourLength = num
-				maxDefender = defender
-		tabDefSol.append(maxDefender)
-		tabKick = self.removeKickStop(maxDefender, tabKick)
-		tabDef.remove(maxDefender)
-		return self.algoGlouton(tabKick, tabDef, tabDefSol)
-	
-	#Récupérer les valeurs des defenders en fonctions de leurs nom
-	def chercheDefenders(self, tabDef):
-		res = []
-		for defender in tabDef:
-			res.append(self.tabDefs.get(defender))
-		return res
-
-	#Verifie que le nombre de kicks bloquer est egale au total du nombre de kicks
-	def allKicksStop(self, tabDef):
-		#tableau kicks -> []
-		#Parcours def
-		#Si kick pas dans tableau alors add 
-		#si taille tableau kick == nombre de kick a arreté alors good
-		return True
-	
-	#Cherche le nombre de voisin en fonction de ceux de la list
-	def numKickOfDefender(self, tabKick, defender):
-		cpt = 0
-		kickStopByDefender = self.tabDefs.get(defender)
-		for kickStop in kickStopByDefender : 
-			for kick in tabKick : 
-				if(kickStop == kick):
-					cpt = cpt + 1
-		return cpt
-
-	def removeKickStop(self, defender, tabKick):
-		kickRemove = self.tabDefs.get(defender)
-		for kick in kickRemove:
-			tabKick.remove(kick)
-		return tabKick
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]

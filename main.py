@@ -5,13 +5,15 @@ import json
 
 from board import *
 from Solver import *
+from algorithm.callOfAlgo import callOfAlgoExect, callOfAlgoGlouton
 
 if (len(sys.argv) < 4):
   sys.exit("Usage: " + sys.argv[0] + "<version (1:prof /2:la notre)> <problem.json> <solution.json>")
 
 version_path = sys.argv[1]
-problem_path = sys.argv[2]
-solution_path = sys.argv[3]
+algo_path = sys.argv[2]
+problem_path = sys.argv[3]
+solution_path = sys.argv[4]
 
 if (version_path == "1") :
 	with open(problem_path) as problem_file:
@@ -23,10 +25,17 @@ if (version_path == "1") :
 	b.run()
 
 elif (version_path == "2"):
+	algo = None
+	if(algo_path == "-e"):
+		algo = callOfAlgoExect
+	elif(algo_path == "-g"):
+		algo = callOfAlgoGlouton
+	else:
+		sys.exit("Error: the type of algorithm is unknown !")
 	with open(problem_path) as problem_file:
 		problem = Problem(json.load(problem_file))
 	with open(solution_path) as solution_file:
-		solver = Solver(problem)
+		solver = Solver(problem,algo)
 		solver.solver(problem_path)
 	print('exec succes')
 else :
