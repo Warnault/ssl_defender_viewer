@@ -19,7 +19,7 @@ class Solver :
 
 		#Contient tous les kickcs marquant
 		self.kicks = []
-		#Tableau d'adjacence {tir -> def & def -> tir}
+		#Tableau d'adjacence {tir -> [def] & def -> [tir]}
 		self.dictNeighbors={}
 
 		#Associe une valeur a un nom:
@@ -49,8 +49,8 @@ class Solver :
 		dictKick = self.kicksNeighbors()
 		self.dictNeighbors.update(dictKick)
 
-		self.algo_solver(self.dictNeighbors, self.tabDefs)
-		#self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver
+		#self.algo_solver(self.dictNeighbors, self.tabDefs)
+		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver()
 
 		self.write_in_file()
 

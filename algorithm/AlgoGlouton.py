@@ -7,8 +7,16 @@ import math
 
 class AlgoGlouton :
   def __init__(self,dictNeighbors,list_of_defencers) :
-    self.list_of_defencers = list_of_defencers
+    self.list_name_of_defencers = list_of_defencers
     self.dictNeighbors = dictNeighbors
+    self.list_defender = []
+    self.list_kick = []
+
+  def solver(self):
+    self.createListKickAndDef()
+    res = self.algoGlouton(self.list_kick, self.list_defender, [])
+    print(res)
+    return self.chercheDefenders(res)
 
   def algoGlouton(self, tabKick, tabDef, tabDefSol):
     tabKickLength = len(tabKick)
@@ -16,39 +24,39 @@ class AlgoGlouton :
     maxDefender = None
     maxNeighbourLength = 0
     if(tabKickLength == 0):
-      self.solution = self.chercheDefenders(tabDefSol)
-      return True
+      return tabDefSol
     if(tabDefLength == 0):
-      return False
+      return []
     for defender in tabDef:
-      num = self.numKickOfDefender(tabKick, tabDef.get(defender))
+      num = self.numKickOfDefender(tabKick, self.dictNeighbors.get(defender))
       if(num > maxNeighbourLength):
         maxNeighbourLength = num
         maxDefender = defender
-      tabDefSol.append(maxDefender)
-      tabKick = self.removeKickStop(maxDefender, tabKick)
-      tabDef.remove(maxDefender)
-      return self.algoGlouton(tabKick, tabDef, tabDefSol)
+    tabDefSol.append(maxDefender)
+    print("==========SOLUTION============")
+    print(tabDefSol)
+    print(maxNeighbourLength)
+    print("=============KICK===================")
+    print(tabKickLength)
+    print("================================")
+    tabKick = self.removeKickStop(maxDefender, tabKick)
+    print(len(tabKick))
+    print("===============DEFENDER=================")
+    print(tabDefLength)
+    tabDef.remove(maxDefender)
+    print(len(tabDef))
+    return self.algoGlouton(tabKick, tabDef, tabDefSol)
 
 	#Récupérer les valeurs des defenders en fonctions de leurs nom
   def chercheDefenders(self, tabDef):
     res = []
     for defender in tabDef:
-      res.append(self.list_of_defencers.get(defender))
+      res.append(self.list_name_of_defencers.get(defender))
     return res
 
-	#Verifie que le nombre de kicks bloquer est egale au total du nombre de kicks
-  def allKicksStop(self, tabDef):
-    #tableau kicks -> []
-    #Parcours def
-    #Si kick pas dans tableau alors add 
-    #si taille tableau kick == nombre de kick a arreté alors good
-    return True
-	
   #Cherche le nombre de voisin en fonction de ceux de la list
-  def numKickOfDefender(self, tabKick, defender):
+  def numKickOfDefender(self, tabKick, kickStopByDefender):
     cpt = 0
-    kickStopByDefender = self.list_of_defencers.get(defender)
     for kickStop in kickStopByDefender : 
       for kick in tabKick : 
         if(kickStop == kick):
@@ -56,7 +64,14 @@ class AlgoGlouton :
     return cpt
 
   def removeKickStop(self, defender, tabKick):
-    kickRemove = self.list_of_defencers.get(defender)
+    kickRemove = self.dictNeighbors.get(defender)
     for kick in kickRemove:
       tabKick.remove(kick)
     return tabKick
+
+  def createListKickAndDef(self):
+    for key in self.dictNeighbors :
+      if "D" in key : 
+        self.list_defender.append(key)
+      else :
+        self.list_kick.append(key)
