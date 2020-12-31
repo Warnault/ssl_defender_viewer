@@ -5,15 +5,10 @@ import sys
 import json
 import math
 
-from goal import *
-from problem import *
-from solution import *
-from board import *
-
 class AlgoGlouton :
-  def __init__(self,solution,list_of_defencers) :
+  def __init__(self,dictNeighbors,list_of_defencers) :
     self.list_of_defencers = list_of_defencers
-    self.solution = solution
+    self.dictNeighbors = dictNeighbors
 
   def algoGlouton(self, tabKick, tabDef, tabDefSol):
     tabKickLength = len(tabKick)
@@ -39,7 +34,7 @@ class AlgoGlouton :
   def chercheDefenders(self, tabDef):
     res = []
     for defender in tabDef:
-      res.append(self.tabDefs.get(defender))
+      res.append(self.list_of_defencers.get(defender))
     return res
 
 	#Verifie que le nombre de kicks bloquer est egale au total du nombre de kicks
@@ -53,7 +48,7 @@ class AlgoGlouton :
   #Cherche le nombre de voisin en fonction de ceux de la list
   def numKickOfDefender(self, tabKick, defender):
     cpt = 0
-    kickStopByDefender = self.tabDefs.get(defender)
+    kickStopByDefender = self.list_of_defencers.get(defender)
     for kickStop in kickStopByDefender : 
       for kick in tabKick : 
         if(kickStop == kick):
@@ -61,7 +56,7 @@ class AlgoGlouton :
     return cpt
 
   def removeKickStop(self, defender, tabKick):
-    kickRemove = self.tabDefs.get(defender)
+    kickRemove = self.list_of_defencers.get(defender)
     for kick in kickRemove:
       tabKick.remove(kick)
     return tabKick

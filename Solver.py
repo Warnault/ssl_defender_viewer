@@ -49,9 +49,10 @@ class Solver :
 		dictKick = self.kicksNeighbors()
 		self.dictNeighbors.update(dictKick)
 
+		self.algo_solver(self.dictNeighbors, self.tabDefs)
+		#self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver
+
 		self.write_in_file()
-	
-		self.algo_solver(self.solver,"846")
 
 
 

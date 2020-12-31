@@ -5,21 +5,17 @@ import sys
 import json
 import math
 
-from goal import *
-from problem import *
-from solution import *
-from board import *
 
 class AlgoExact :
-  def __init__(self,solution,list_of_defencers) :
+  def __init__(self,dictNeighbors,list_of_defencers) :
     self.list_of_defencers = list_of_defencers
-    self.solution = solution
+    self.dictNeighbors = dictNeighbors
 
-  def algoExact(self):
+  def solver(self):
     self.algoExactRec([],0)
 
   def algoExactRec(self, tabDef, currentDef):
-    numDef = len(self.tabDefs)
+    numDef = len(self.list_of_defencers)
     #Bloque si on a parcourut tous les défenseurs
     if(currentDef == numDef):
       return False
