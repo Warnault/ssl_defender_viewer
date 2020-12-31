@@ -32,19 +32,12 @@ class AlgoGlouton :
       if(num > maxNeighbourLength):
         maxNeighbourLength = num
         maxDefender = defender
+        if(maxNeighbourLength == tabKickLength):
+          tabDefSol.append(maxDefender)
+          return tabDefSol
     tabDefSol.append(maxDefender)
-    print("==========SOLUTION============")
-    print(tabDefSol)
-    print(maxNeighbourLength)
-    print("=============KICK===================")
-    print(tabKickLength)
-    print("================================")
     tabKick = self.removeKickStop(maxDefender, tabKick)
-    print(len(tabKick))
-    print("===============DEFENDER=================")
-    print(tabDefLength)
     tabDef.remove(maxDefender)
-    print(len(tabDef))
     return self.algoGlouton(tabKick, tabDef, tabDefSol)
 
 	#Récupérer les valeurs des defenders en fonctions de leurs nom
@@ -61,6 +54,7 @@ class AlgoGlouton :
       for kick in tabKick : 
         if(kickStop == kick):
           cpt = cpt + 1
+          break
     return cpt
 
   def removeKickStop(self, defender, tabKick):
