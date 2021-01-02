@@ -38,8 +38,8 @@ elif (version_path == "2"):
 		sys.exit("Error: the type of algorithm is unknown !")
 	with open(problem_path) as problem_file:
 		problem = Problem(json.load(problem_file))
-	with open(solution_path) as solution_file:
-		solver = Solver(problem,algo)
+	with open(solution_path,'a') as solution_file:
+		solver = Solver(solution_path, problem,algo)
 		solver.solver(problem_path)
 	print('exec succes')
 else :

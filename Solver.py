@@ -12,10 +12,10 @@ from board import *
 
 # write  defenders position in self.solution and call self.read_in_file() for create .json
 class Solver :
-	def __init__(self,problem,algo_solver) :
+	def __init__(self,file_name,problem,algo_solver) :
 		self.problem = problem
 		self.solution = []
-		self.name_file = 'sol.json'
+		self.file_name = file_name
 
 		#Contient tous les kickcs marquant
 		self.kicks = []
@@ -60,12 +60,13 @@ class Solver :
 		mandatory_keys = "defenders"
 		out = {}
 		out[mandatory_keys] = self.solution
-		with open(self.name_file, 'w') as jf:
+		open(self.file_name,'a')
+		with open(self.file_name, 'w') as jf:
 			json.dump(out,jf)
-			print("Create file : " + self.name_file)
+			print("Create file : " + self.file_name)
 
 	def read_file(self) :
-		with open(self.name_file,'r') as f :
+		with open(self.file_name,'r') as f :
 			data = json.load(f)
 
 

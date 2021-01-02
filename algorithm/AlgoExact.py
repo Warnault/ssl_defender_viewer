@@ -4,6 +4,7 @@ import numpy
 import sys
 import json
 import math
+import itertools
 
 from algorithm.AlgoSolver import *
 
@@ -17,26 +18,14 @@ class AlgoExact(AlgoSolver):
 
   def solver(self):
     self.createListKickAndDef()
-    res = self.algoExactRec([],0)
-    print(res)
-    return self.chercheDefenders(res)
+    for i in range(len(self.list_defender)):
+      list_permutation = itertools.permutations(self.list_defender,i)
+      for ele in list_permutation:
+        if(self.allKicksStop(ele)):
+          print("solver",ele)
+          return self.chercheDefenders(ele)
+    return []
 
-  def algoExactRec(self, tabDef, currentDef):
-    numDef = len(self.list_defender)
-    #Bloque si on a parcourut tous les défenseurs
-    if(currentDef == numDef):
-      return []
-    for i in range(currentDef, numDef) :
-      newTabDef = tabDef
-      newTabDef.append(self.list_defender[i])
-      #Verifie si tous les tirs sont bloqué
-      if(self.allKicksStop(newTabDef)):
-        return tabDef
-      print("======================")
-      print(tabDef)
-      self.algoExactRec(newTabDef, i+1)
-
-    
   def createListKickAndDef(self):
     for key in self.dictNeighbors :
       if "D" in key : 
@@ -46,7 +35,9 @@ class AlgoExact(AlgoSolver):
 
 	#Verifie que le nombre de kicks bloquer est egale au total du nombre de kicks
   def allKicksStop(self, tabDef):
-    allKicksStop = self.list_kick
+    allKicksStop = self.list_kick.copy()
+    #print(allKicksStop)
+    kickToStopByDefender = 0
     for defender in tabDef :
       kickToStopByDefender = self.dictNeighbors.get(defender)
       for kick in kickToStopByDefender :
@@ -56,9 +47,20 @@ class AlgoExact(AlgoSolver):
       return True
     return False
 
-  #Récupérer les valeurs des defenders en fonctions de leurs nom
-  def chercheDefenders(self, tabDef):
-    res = []
-    for defender in tabDef:
-      res.append(self.list_name_of_defencers.get(defender))
-    return res
+#  def algoExactRec(self, tabDef, index, list_defender):
+#    numDef = len(list_defender)
+#    if(index == numDef):
+#      return []
+#    for i in range(index):
+#      for d in list_defender:
+#        copy_tabDef = tabDef.copy()
+#        #copy_list_defender = list_defender.copy()
+#        if(d not in copy_tabDef):
+#          copy_tabDef.append(d)      
+#        #copy_list_defender.remove(d)
+#        if(self.allKicksStop(copy_tabDef)):
+#          print("Gagnee , normalement ",copy_tabDef)
+#          return copy_tabDef
+#    index+=1
+#    return self.algoExactRec,tabDef,index,list_defender)
+#
