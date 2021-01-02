@@ -3,7 +3,7 @@
 
 ## Utilisation 
 
-- Afin de pouvoir utiliser notre application vous devez rendre le maim.py exécutable, s'il ne l'est pas déjà utiliser la commande " chmod +X main.py" dans le terminal à l'endroit où se trouve le fichier pour palier à ce problème.
+- Afin de pouvoir utiliser notre application vous devez rendre le main.py exécutable, s'il ne l'est pas déjà utiliser la commande " chmod +X main.py" dans le terminal à l'endroit où se trouve le fichier pour palier à ce problème.
 
 # Pour générer une solution taper : 
   -./main.py 2 <probleme_file.json>  <solution_file.json> -<algo>,
