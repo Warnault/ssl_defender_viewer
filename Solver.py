@@ -57,6 +57,7 @@ class Solver :
 		self.dictNeighbors.update(self.kicksNeighbors())
 		
 		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver()
+		print(self.solution)
 		self.write_in_file()
 
 	def areaKepper(self):
@@ -198,7 +199,6 @@ def lies_in_range(interval,coord,radius):
 		if( val>=interval[0] and val<=interval[1] ): 
 			return True
 	return False
-	
 def collision_with_ennemy(file_pb,coord):
 	file = open(file_pb,)
 	data = json.load(file)
