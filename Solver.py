@@ -28,8 +28,6 @@ class Solver :
 		self.tabKicks = {}
 		#D0 -> [x, y] 
 		self.tabDefs = {}
-		#G0 -> [x, y] 
-		self.tabGoal = {}
 
 		self.algo_solver = algo_solver
 		
@@ -43,20 +41,22 @@ class Solver :
 		self.solution = self.defendersStopKicks(self.solution)
 
 		#Crée le dictionnaire avec nom: position
-		self.createNameArray()
-
-		#Crée list d'adjacence
-		self.dictNeighbors = self.defendersNeighbors(self.solution)
-		dictKick = self.kicksNeighbors()
-		self.dictNeighbors.update(dictKick)
+		self.tabKicks = giveName(self.kicks, "T")
 
 		#self.algo_solver(self.dictNeighbors, self.tabDefs)
 		if(self.solution_with_goal):
 			self.solution_goal = self.areaKepper()
-			self.tabGoal = giveName(self.solution_goal, "G")
-			self.dictNeighbors.update(self.tabGoal)
+			self.tabDefs = giveName(self.solution_goal, "G")
+			self.dictNeighbors.update(self.defendersNeighbors(self.solution_goal))
+			
+		#Crée le dictionnaire avec nom: position
+		self.tabDefs.update(giveName(self.solution, "D"))
 		
-		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs,self.tabGoal).solver()
+		#Remplis le tableau des adjacences 
+		self.dictNeighbors.update(self.defendersNeighbors(self.solution))
+		self.dictNeighbors.update(self.kicksNeighbors())
+		
+		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver()
 		self.write_in_file()
 
 	def areaKepper(self):
@@ -191,10 +191,6 @@ class Solver :
 				nameKicked = findKey(self.tabKicks, kick)
 				dict[nameKicked] = tabDefs
 		return dict		
-		
-	def createNameArray(self):
-		self.tabKicks = giveName(self.kicks, "T")
-		self.tabDefs = giveName(self.solution, "D")
 
 def lies_in_range(interval,coord,radius):
 	values = [(coord-radius),coord,(coord+radius)]
