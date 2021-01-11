@@ -16,6 +16,7 @@ class Solver :
 		self.problem = problem
 		self.solution = []
 		self.file_name = file_name
+		self.solution_goal = []
 
 		#Contient tous les kickcs marquant
 		self.kicks = []
@@ -27,10 +28,10 @@ class Solver :
 		self.tabKicks = {}
 		#D0 -> [x, y] 
 		self.tabDefs = {}
+		#G0 -> [x, y] 
+		self.tabGoal = {}
 
 		self.algo_solver = algo_solver
-		#Solution:
-		##self.algoExact([], 0)
 		
 
 	def solver(self,file_pb):
@@ -39,22 +40,37 @@ class Solver :
 		#Genere tous les tirs marquant
 		self.shootOnTarget()
 		#Garde les défenseurs qui bloques les tirs
-		self.defendersStopKicks()
+		self.solution = self.defendersStopKicks(self.solution)
 
 		#Crée le dictionnaire avec nom: position
 		self.createNameArray()
 
 		#Crée list d'adjacence
-		self.dictNeighbors = self.defendersNeighbors()
+		self.dictNeighbors = self.defendersNeighbors(self.solution)
 		dictKick = self.kicksNeighbors()
 		self.dictNeighbors.update(dictKick)
 
 		#self.algo_solver(self.dictNeighbors, self.tabDefs)
+		self.solution = self.areaKepper()
+		self.tabGoal = giveName(self.solution_goal, "G")
+		
 		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver()
-
 		self.write_in_file()
 
+	def areaKepper(self):
+		x_area = [min(self.problem.goalkeeper_area[0][1], self.problem.goalkeeper_area[0][0]),
+					max(self.problem.goalkeeper_area[0][1], self.problem.goalkeeper_area[0][0])]
+		y_area = [min(self.problem.goalkeeper_area[1][1], self.problem.goalkeeper_area[1][0]),
+					max(self.problem.goalkeeper_area[1][1], self.problem.goalkeeper_area[1][0])]
+		radius = self.problem.robot_radius
+		tab = []
+		for sol in self.solution:
+			if(lies_in_range(y_area, sol[1], radius) and lies_in_range(x_area, sol[0], radius)) :
+				tab.append(sol)
+		for sol in tab :
+			self.solution.remove(sol)
 
+		return tab
 
 	def write_in_file(self,) :
 		mandatory_keys = "defenders"
@@ -107,9 +123,8 @@ class Solver :
 			elif( e[1]<max_y and e[1]>max_y_b ): max_y = e[1]
 		return [min_y, max_y]
 
-	def defendersStopKicks(self):
+	def defendersStopKicks(self, defenders):
 		problem = self.problem
-		defenders = self.solution
 		new_defenders =[]
 		for defender in defenders:
 			intercepted = False
@@ -120,7 +135,7 @@ class Solver :
 					intercepted = True
 			if(intercepted): 
 				new_defenders.append(defender)
-		self.solution = new_defenders
+		return new_defenders
 		
 
 	def shootOnTarget(self):
@@ -138,9 +153,8 @@ class Solver :
 						self.kicks.append(sommet)
 				kick_dir += problem.theta_step
 
-	def defendersNeighbors(self):
+	def defendersNeighbors(self, defenders):
 		problem = self.problem
-		defenders = self.solution
 		dict = {}
 		for defender in defenders:
 			tabKick = []
@@ -178,7 +192,6 @@ class Solver :
 		
 	def createNameArray(self):
 		self.tabKicks = giveName(self.kicks, "T")
-
 		self.tabDefs = giveName(self.solution, "D")
 
 def lies_in_range(interval,coord,radius):
