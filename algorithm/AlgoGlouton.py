@@ -9,28 +9,38 @@ import abc
 from algorithm.AlgoSolver import *
 
 class AlgoGlouton(AlgoSolver) :
-  def __init__(self,dictNeighbors,list_of_defencers,list_of_goals) :
+  def __init__(self,dictNeighbors, list_of_defencers) :
     self.list_name_of_defencers = list_of_defencers
     self.dictNeighbors = dictNeighbors
     self.list_defender = []
     self.list_kick = []
-    self.list_of_goals = list_of_goals
+    self.list_goal = []
 
   def solver(self):
-    if (len(self.list_of_goals)==0):
-        self.solver_without_keeper()
-    else:
-        self.solver_with_keeper()
-
-
-  def solver_without_keeper(self):   
+    print("In Glouton :")
     self.createListKickAndDef()
-    res = self.algoGlouton(self.list_kick, self.list_defender, [])
+    print(self.list_kick)
+    res = []
+    if (len(self.list_goal) != 0):
+      print("test")
+      res = self.algoGloutonGoal(self.list_goal)
+      print(self.list_kick)
+
+    res = self.algoGlouton(self.list_kick, self.list_defender, res)
     print(res)
     return self.chercheDefenders(res)
 
-  def solver_with_keeper(self):
-    print("Glouton")
+  def algoGloutonGoal(self, tabDef):
+    print("coucou")
+    maxDefender = None
+    maxNeighbourLength = 0
+    for defender in tabDef:
+      num = self.numKickOfDefender(self.list_kick, self.dictNeighbors.get(defender))
+      if(num > maxNeighbourLength):
+        maxNeighbourLength = num
+        maxDefender = defender
+    self.list_kick = self.removeKickStop(maxDefender, self.list_kick)
+    return [maxDefender]
 
   def algoGlouton(self, tabKick, tabDef, tabDefSol):
     tabKickLength = len(tabKick)
