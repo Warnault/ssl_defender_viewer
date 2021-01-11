@@ -12,12 +12,12 @@ from board import *
 
 # write  defenders position in self.solution and call self.read_in_file() for create .json
 class Solver :
-	def __init__(self,file_name,problem,algo_solver) :
+	def __init__(self,file_name,problem,algo_solver,keeper=False) :
 		self.problem = problem
 		self.solution = []
 		self.file_name = file_name
 		self.solution_goal = []
-
+		self.solution_with_goal = keeper
 		#Contient tous les kickcs marquant
 		self.kicks = []
 		#Tableau d'adjacence {tir -> [def] & def -> [tir]}
@@ -51,10 +51,12 @@ class Solver :
 		self.dictNeighbors.update(dictKick)
 
 		#self.algo_solver(self.dictNeighbors, self.tabDefs)
-		self.solution = self.areaKepper()
-		self.tabGoal = giveName(self.solution_goal, "G")
+		if(self.solution_with_goal):
+			self.solution_goal = self.areaKepper()
+			self.tabGoal = giveName(self.solution_goal, "G")
+			self.dictNeighbors.update(self.tabGoal)
 		
-		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs).solver()
+		self.solution = self.algo_solver(self.dictNeighbors, self.tabDefs,self.tabGoal).solver()
 		self.write_in_file()
 
 	def areaKepper(self):

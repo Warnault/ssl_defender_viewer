@@ -19,7 +19,7 @@ if ( len(sys.argv) >4):
 	algo_path = sys.argv[4]
 
 
-if (version_path == "1") :
+if (version_path == '1') :
 	with open(problem_path) as problem_file:
 		problem = Problem(json.load(problem_file))
 	with open(solution_path) as solution_file:
@@ -28,7 +28,7 @@ if (version_path == "1") :
 	b = Board(problem, solution)
 	b.run()
 
-elif (version_path == "2"):
+elif (version_path == '2' or version_path == '3'):
 	algo = None
 	if(algo_path == "-e"):
 		algo = callOfAlgoExect
@@ -39,9 +39,13 @@ elif (version_path == "2"):
 	with open(problem_path) as problem_file:
 		problem = Problem(json.load(problem_file))
 	with open(solution_path,'a') as solution_file:
-		solver = Solver(solution_path, problem,algo)
+		if(version_path== '2'):
+			solver = Solver(solution_path, problem,algo)
+		else:
+			solver =Solver(solution_path, problem,algo,True)
 		solver.solver(problem_path)
 	print('exec succes')
+
 else :
 	 sys.exit("Usage: " + sys.argv[0] + " <version> <problem.json> <solution.json> \n version 1 : prof \n version 2 : la notre")
 

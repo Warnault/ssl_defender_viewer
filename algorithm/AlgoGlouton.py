@@ -9,17 +9,28 @@ import abc
 from algorithm.AlgoSolver import *
 
 class AlgoGlouton(AlgoSolver) :
-  def __init__(self,dictNeighbors,list_of_defencers) :
+  def __init__(self,dictNeighbors,list_of_defencers,list_of_goals) :
     self.list_name_of_defencers = list_of_defencers
     self.dictNeighbors = dictNeighbors
     self.list_defender = []
     self.list_kick = []
+    self.list_of_goals = list_of_goals
 
   def solver(self):
+    if (len(self.list_of_goals)==0):
+        self.solver_without_keeper()
+    else:
+        self.solver_with_keeper()
+
+
+  def solver_without_keeper(self):   
     self.createListKickAndDef()
     res = self.algoGlouton(self.list_kick, self.list_defender, [])
     print(res)
     return self.chercheDefenders(res)
+
+  def solver_with_keeper(self):
+    print("Glouton")
 
   def algoGlouton(self, tabKick, tabDef, tabDefSol):
     tabKickLength = len(tabKick)
