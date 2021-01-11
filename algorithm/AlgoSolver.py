@@ -17,7 +17,7 @@ class AlgoSolver(metaclass=abc.ABCMeta):
     for key in self.dictNeighbors :
       if "D" in key : 
         self.list_defender.append(key)
-      elif "T":
+      elif "T" in key:
         self.list_kick.append(key)
       else :
         self.list_goal.append(key)
