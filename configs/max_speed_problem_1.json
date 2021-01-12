@@ -7,11 +7,13 @@
         }
     ],
     "opponents" : [
-        [4.2, 2.5],
-        [3.9, 2.2]
+        [0.5, 0.0],
+        [-2.0, -2.0],
+        [2, 1.0]
     ],
     "robot_radius" : 0.09,
     "theta_step" : 0.031416,
-    "pos_step" : 0.2,
-    "goalkeeper_area" : [[4.0, 4.5], [-1.0,1.0] ]
+    "pos_step" : 0.1,
+    "ball_max_speed" : 8.0,
+    "robot_max_speed" : 2.0
 }
