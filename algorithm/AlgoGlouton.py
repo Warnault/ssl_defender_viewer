@@ -78,6 +78,7 @@ class AlgoGlouton(AlgoSolver) :
   def removeKickStop(self, defender, tabKick):
     kickRemove = self.dictNeighbors.get(defender)
     for kick in kickRemove:
-      tabKick.remove(kick)
+      if kick in tabKick:
+        tabKick.remove(kick)
     return tabKick
 
