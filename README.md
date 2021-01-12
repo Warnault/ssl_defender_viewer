@@ -13,5 +13,5 @@ Actuellement pour le choix de l'alogorithme il y a deux possibilités:
   - l'algorithme exact : -e,
   - l'algorithme glouton : -g. 
 
-# Pour exécuter le programme taper : 
+## Pour exécuter le programme taper : 
   - ```./main.py 1 <probleme_file.json>  <solution_file.json>```
